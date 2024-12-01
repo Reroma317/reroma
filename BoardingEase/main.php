@@ -9,6 +9,13 @@
     <title>Search Results</title>
     <link rel="stylesheet" href="css/main.css">
     <script defer src="js/searchupload.js"></script>
+    <script defer src="js/search.js"></script>
+    <script defer src="js/notification.js"></script>
+    <script defer src="js/upload.js"></script>
+    <script defer src="js/home.js"></script>
+    <script defer src="js/edit_delete_upload.js"></script>
+    <script defer src="js/editdelete.js"></script>
+    <script defer src="js/profile.js"></script>
 </head>
 
 <body>
@@ -26,16 +33,18 @@
             </form>
         </div>
     </nav>
-    <div class="main-container">
+<body>
+<div class="main-container">
         <!-- Fixed Profile Container -->
         <div class="fixed-container">
             <div class="profile-pic">
-                <img src="<?php echo $profile_image; ?>" alt="Profile Picture">
+                <img src="uploads/default-profile.jpg" alt="Profile Picture">
             </div>
             <div class="profile-details">
-                <p><strong>Name:</strong> </p>
-                <p><strong>Email:</strong> </p>
+                <p>Loading user information...</p> <!-- Placeholder until data is loaded -->
             </div>
+            <!-- Edit Profile Button -->
+            <button id="edit-profile-btn" class="edit-profile-btn">Edit Profile</button>
         </div>
     </div>
 
@@ -54,27 +63,31 @@
     </div>
 
     <!-- Search Form -->
-    <div id="search-form" class="form-section">
-        <h3>Search</h3>
-        <form id="searchForm" method="POST">
-            <label for="city">City:</label>
-            <input type="text" id="city" name="city" required>
+    <div class="newsfeed-container" id="newsfeed-container">
+    <p>Use the search form to find available rooms.</p> <!-- Placeholder content -->
+</div>
 
-            <label for="barangay">Barangay:</label>
-            <input type="text" id="barangay" name="barangay" required>
+<div id="search-form" class="form-section">
+    <h3>Search</h3>
+    <form id="searchForm" method="POST">
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" required>
 
-            <label for="street">Street:</label>
-            <input type="text" id="street" name="street">
+        <label for="barangay">Barangay:</label>
+        <input type="text" id="barangay" name="barangay" required>
 
-            <label for="rooms">Rooms:</label>
-            <input type="number" id="rooms" name="rooms" min="1">
+        <label for="street">Street:</label>
+        <input type="text" id="street" name="street">
 
-            <label for="payment">Monthly Payment:</label>
-            <input type="number" id="payment" name="payment" min="0">
+        <label for="rooms">Available:</label>
+        <input type="number" id="rooms" name="rooms" min="1">
 
-            <button type="submit" class="submit-btn">Search</button>
-        </form>
-    </div>
+        <label for="payment">Monthly Payment:</label>
+        <input type="number" id="payment" name="payment" min="0">
+
+        <button type="submit" class="submit-btn">Search</button>
+    </form>
+</div>
 
     <!-- Upload Form -->
     <div id="upload-form" class="form-section hidden">
@@ -89,7 +102,7 @@
         <label for="upload-street">Street:</label>
         <input type="text" id="upload-street" name="upload_street">
 
-        <label for="upload-rooms">Rooms:</label>
+        <label for="upload-rooms">Available:</label>
         <input type="number" id="upload-rooms" name="upload_rooms" min="1" required>
 
         <label for="upload-payment">Monthly Payment:</label>
@@ -104,62 +117,12 @@
     </div>
     </div>
 
-    
 
 <!-- Hidden Notification Content -->
-<div id="notification-container" style="display: none;">
+<div id="notification-container">
     <h3>Notifications</h3>
-    <div class="notification-card">
-        <p>You have a new message from User123.</p>
-    </div>
-    <div class="notification-card">
-        <p>Search completed successfully. View your results.</p>
-    </div>
-    <div class="notification-card">
-        <p>Room availability updated in your preferred area.</p>
-    </div>
+    <!-- Notifications will be dynamically loaded here -->
 </div>
-
-
-
-
-
-    <script>
-        // AJAX request to handle form submission without page reload
-        document.getElementById('searchForm').addEventListener('submit', function (e) {
-            e.preventDefault(); // Prevent form from submitting normally
-
-            const formData = new FormData(this);
-
-            fetch('search.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.text())  // The server returns HTML content
-            .then(data => {
-                document.getElementById('newsfeed-container').innerHTML = data;
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    </script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const notificationBtn = document.getElementById('notification-btn');
-        const newsfeedContainer = document.getElementById('newsfeed-container');
-        const notificationContainer = document.getElementById('notification-container');
-
-        // Function to display the notification container in the newsfeed
-        function showNotifications() {
-            // Replace the newsfeed content with the notification container
-            newsfeedContainer.innerHTML = notificationContainer.innerHTML;
-        }
-
-        // Attach click event to the notification button
-        notificationBtn.addEventListener('click', showNotifications);
-    });
-</script>
-
 
 
 

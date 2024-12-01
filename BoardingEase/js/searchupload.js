@@ -1,27 +1,22 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const searchButton = document.getElementById("show-search");
-    const uploadButton = document.getElementById("show-upload");
-    const searchForm = document.getElementById("search-form");
-    const uploadForm = document.getElementById("upload-form");
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadFormContainer = document.getElementById('upload-form');
+    const searchFormContainer = document.getElementById('search-form');
+    const uploadButton = document.getElementById('show-upload');
+    const searchButton = document.getElementById('show-search');
 
-    // Function to toggle forms
-    function toggleForms(activeForm, inactiveForm, activeButton, inactiveButton) {
-        activeForm.classList.remove("hidden");
-        inactiveForm.classList.add("hidden");
-        activeButton.classList.add("active");
-        inactiveButton.classList.remove("active");
-    }
-
-    // Show Search Form and Hide Upload Form
-    searchButton.addEventListener("click", function () {
-        toggleForms(searchForm, uploadForm, searchButton, uploadButton);
+    // Add click event to toggle between upload and search forms
+    uploadButton.addEventListener('click', () => {
+        uploadFormContainer.classList.remove('hidden'); // Show upload form
+        searchFormContainer.classList.add('hidden'); // Hide search form
+        uploadButton.classList.add('active'); // Highlight the active button
+        searchButton.classList.remove('active'); // Remove highlight from search button
     });
 
-    // Show Upload Form and Hide Search Form
-    uploadButton.addEventListener("click", function () {
-        toggleForms(uploadForm, searchForm, uploadButton, searchButton);
+    searchButton.addEventListener('click', () => {
+        searchFormContainer.classList.remove('hidden'); // Show search form
+        uploadFormContainer.classList.add('hidden'); // Hide upload form
+        searchButton.classList.add('active'); // Highlight the active button
+        uploadButton.classList.remove('active'); // Remove highlight from upload button
     });
-
-    // Initial Display (Search Form visible by default)
-    toggleForms(searchForm, uploadForm, searchButton, uploadButton);
 });
+

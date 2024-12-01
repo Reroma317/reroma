@@ -1,87 +1,77 @@
 <?php
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+session_start();
 
-// Database connection
-$host = 'localhost';  // Database host
-$dbname = 'boardingease';  // Database name
-$dbusername = 'root';  // Database username
-$dbpassword = '';  // Database password
+$host = 'localhost';
+$dbname = 'boardingease';
+$dbusername = 'root';
+$dbpassword = '';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $dbusername, $dbpassword);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    die("Connection failed: " . $e->getMessage());
 }
 
+// Fetch search criteria
+$city = $_POST['city'] ?? '';
+$barangay = $_POST['barangay'] ?? '';
+$street = $_POST['street'] ?? '';
+$rooms = $_POST['rooms'] ?? null;
+$payment = $_POST['payment'] ?? null;
 
-// Check if form is submitted via AJAX
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get form values
-    $city = $_POST['city'];
-    $barangay = $_POST['barangay'];
-    $street = isset($_POST['street']) ? $_POST['street'] : '';
-    $rooms = isset($_POST['rooms']) ? $_POST['rooms'] : '';
-    $payment = isset($_POST['payment']) ? $_POST['payment'] : '';
+// Build query with placeholders
+$sql = "SELECT * FROM uploads WHERE city LIKE :city AND barangay LIKE :barangay";
+$params = [
+    ':city' => '%' . $city . '%',
+    ':barangay' => '%' . $barangay . '%',
+];
 
-    // Build the query
-    $query = "SELECT * FROM uploads WHERE city LIKE :city AND barangay LIKE :barangay";
-    
-    // Add optional filters to the query if they are set
-    if ($street != '') {
-        $query .= " AND street LIKE :street";
-    }
-    if ($rooms != '') {
-        $query .= " AND rooms >= :rooms";
-    }
-    if ($payment != '') {
-        $query .= " AND payment <= :payment";
-    }
+if (!empty($street)) {
+    $sql .= " AND street LIKE :street";
+    $params[':street'] = '%' . $street . '%';
+}
 
-    // Prepare the query
-    $stmt = $pdo->prepare($query);
+if (!empty($rooms)) {
+    $sql .= " AND rooms >= :rooms";
+    $params[':rooms'] = (int) $rooms;
+}
 
-    // Bind parameters
-    $stmt->bindValue(':city', "%$city%");
-    $stmt->bindValue(':barangay', "%$barangay%");
-    
-    // Bind optional parameters
-    if ($street != '') {
-        $stmt->bindValue(':street', "%$street%");
-    }
-    if ($rooms != '') {
-        $stmt->bindValue(':rooms', $rooms, PDO::PARAM_INT);
-    }
-    if ($payment != '') {
-        $stmt->bindValue(':payment', $payment, PDO::PARAM_STR);
-    }
+if (!empty($payment)) {
+    $sql .= " AND payment <= :payment";
+    $params[':payment'] = (float) $payment;
+}
 
-    // Execute the query
-    $stmt->execute();
+$sql .= " ORDER BY id DESC";
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Fetch results
-    $uploads = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (empty($uploads)) {
-        echo '<p>No data to show. Use the search form to find available rooms.</p>';
-    } else {
-        echo '<div class="search-results">';
-        foreach ($uploads as $upload) {
-            echo '<div class="room-item">';
-            echo '<h4>' . htmlspecialchars($upload['city']) . ', ' . htmlspecialchars($upload['barangay']) . ' - ' . htmlspecialchars($upload['street']) . '</h4>';
-            echo '<p>Rooms: ' . $upload['rooms'] . '</p>';
-            echo '<p>Monthly Payment: ' . number_format($upload['payment'], 2) . '</p>';
-            echo '<p>Photos: ';
-            $photos = explode(',', $upload['photos']);
+// Generate HTML for search results
+$output = '';
+if (count($results) > 0) {
+    foreach ($results as $result) {
+        $photos = explode(',', $result['photos']);
+        $output .= '<div class="result-card">';
+        $output .= '<div class="result-header">';
+        $output .= '<h4>' . htmlspecialchars($result['city']) . ', ' . htmlspecialchars($result['barangay']) . '</h4>';
+        $output .= '<p>' . htmlspecialchars($result['street']) . '</p>';
+        $output .= '</div>';
+        $output .= '<div class="result-details">';
+        $output .= '<p><strong>Available:</strong> ' . htmlspecialchars($result['rooms']) . '</p>';
+        $output .= '<p><strong>Monthly Payment:</strong> ₱' . htmlspecialchars($result['payment']) . '</p>';
+        if (!empty($photos[0])) {
+            $output .= '<div class="result-images">';
             foreach ($photos as $photo) {
-                echo '<img src="uploads/' . htmlspecialchars($photo) . '" alt="Room Photo" class="room-photo">';
+                $output .= '<img src="' . htmlspecialchars($photo) . '" alt="Photo" class="result-image">';
             }
-            echo '</p>';
-            echo '</div>';
+            $output .= '</div>';
         }
-        echo '</div>';
+        $output .= '</div>';
+        $output .= '</div>';
     }
+} else {
+    $output = '<p>No results found.</p>';
 }
-?>
+
+echo $output; 
